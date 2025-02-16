@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Autism Network Canada</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
             margin: 0;
@@ -421,26 +422,300 @@
     </main>
 
 <!-- Chatbot Icon -->
-<div id="chatbot-icon" onclick="toggleChatbot()">
-    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#203a43" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 5V3a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/>
-    </svg>
+<div id="chatbot-icon" class="position-fixed bottom-0 end-0 m-3 p-3 bg-white shadow rounded-circle" 
+     style="cursor: pointer; z-index: 1030;" onclick="toggleChatbot()">
+    <span style="font-size: 1.5rem;">🤖</span>
 </div>
 
 <!-- Chatbot Container -->
-<div id="chatbot-container" style="display: none;">
-    <div class="chat-header">
-        <span>Chatbot Assistant</span>
-        <button onclick="toggleChatbot()">❌</button>
+<div id="chatbot-container" class="position-fixed bottom-0 end-0 m-3 bg-white shadow-lg rounded p-3 d-none" 
+     style="width: 350px; height: 500px; z-index: 1020;">
+    <div class="d-flex justify-content-between align-items-center border-bottom pb-2">
+        <strong>Chatbot Assistant</strong>
+        <button class="btn-close" onclick="toggleChatbot()"></button>
     </div>
-    <div class="chat-body" id="chatBody"></div>
-    <div class="chat-input">
-        <input type="text" id="userInput" placeholder="Type your message...">
-        <button id="sendBtn">➤</button>
+    <div id="chatBody" class="overflow-auto my-3" style="height: calc(100% - 110px);"></div>
+    <div class="input-group mt-auto">
+        <input type="text" class="form-control" id="userInput" placeholder="Type your message...">
+        <button class="btn btn-primary" id="sendBtn">Send</button>
     </div>
 </div>
 
 
     <script src="script.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <script>
+        let chatBody = document.getElementById('chatBody');
+        let userInput = document.getElementById('userInput');
+        let sendBtn = document.getElementById('sendBtn');
+
+        // Canadian cities specialists database
+        const specialistsDatabase = {
+            'toronto': [
+                "Toronto Autism Services - Dr. Sarah Chen (416-555-0123)",
+                "Holland Bloorview Kids Rehabilitation Hospital",
+                "Surrey Place Centre",
+                "Geneva Centre for Autism"
+            ],
+            'vancouver': [
+                "BC Children's Hospital Autism Program",
+                "Pacific Autism Family Network",
+                "Dr. Michael Thompson - Vancouver Autism Center (604-555-0123)",
+                "ACT - Autism Community Training"
+            ],
+            'montreal': [
+                "Montreal Children's Hospital Autism Spectrum Disorder Program",
+                "Autism Therapy Centre - Dr. Marie Laurent (514-555-0123)",
+                "Gold Learning Centre",
+                "Giant Steps School and Resource Centre"
+            ],
+            'calgary': [
+                "The Ability Hub",
+                "Calgary Autism Services - Dr. James Wilson (403-555-0123)",
+                "Society for Treatment of Autism (STA)",
+                "Autism Calgary Association"
+            ],
+            'ottawa': [
+                "CHEO Autism Program",
+                "Ottawa Children's Treatment Centre",
+                "Dr. Emily Roberts - Ottawa Autism Specialists (613-555-0123)",
+                "Service Coordination for People with Developmental Disabilities"
+            ]
+        };
+
+        // Display welcome message when chatbot is opened
+        function toggleChatbot() {
+            const chatContainer = document.getElementById('chatbot-container');
+            chatContainer.classList.toggle('d-none');
+            
+            // If we're showing the chatbot, display the welcome message
+            if (!chatContainer.classList.contains('d-none')) {
+                displayWelcomeMessage();
+            }
+        }
+
+        // Initial welcome message
+        function displayWelcomeMessage() {
+            const welcomeMessage = `
+                <div class="bot-message message">
+                    Hello! I'm your autism support assistant. I can help you with:
+                    <ul style="list-style: none; padding-left: 0; margin-top: 10px;">
+                        <li>• Information about autism</li>
+                        <li>• Finding specialists in Canadian cities</li>
+                        <li>• Treatment options and support services</li>
+                        <li>• Educational resources</li>
+                        <li>• Support groups and community connections</li>
+                    </ul>
+                    What would you like to know about?
+                </div>
+            `;
+            chatBody.innerHTML = welcomeMessage;
+        }
+
+        // Function to add message to chat
+        function addMessage(message, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            messageDiv.innerHTML = message;
+            chatBody.appendChild(messageDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        // Function to get bot response
+        function getBotResponse(userMessage) {
+            userMessage = userMessage.toLowerCase();
+
+            // Check if message contains a city name
+            const cityMentioned = Object.keys(specialistsDatabase).find(city => 
+                userMessage.includes(city)
+            );
+
+            // Information about autism
+            if (userMessage.includes('information') || userMessage.includes('about autism')) {
+                return `
+                    Here's key information about autism:
+                    <ul style="list-style: none; padding-left: 0; margin-top: 10px;">
+                        <li>• Autism Spectrum Disorder (ASD) is a complex developmental condition affecting communication and behavior</li>
+                        <li>• Signs typically appear in early childhood</li>
+                        <li>• Common characteristics include:
+                            <ul style="list-style: none; padding-left: 20px;">
+                                <li>- Differences in social communication</li>
+                                <li>- Repetitive behaviors or restricted interests</li>
+                                <li>- Sensory sensitivities</li>
+                                <li>- Unique learning styles</li>
+                            </ul>
+                        </li>
+                        <li>• Each person with autism has unique strengths and challenges</li>
+                        <li>• Early intervention can significantly improve outcomes</li>
+                    </ul>
+                    Would you like more specific information about any of these aspects?
+                `;
+            }
+            
+            // Finding specialists
+            else if (userMessage.includes('specialist') || userMessage.includes('doctor') || userMessage.includes('find')) {
+                if (cityMentioned) {
+                    return `
+                        Here are autism specialists and centers in ${cityMentioned.charAt(0).toUpperCase() + cityMentioned.slice(1)}:
+                        <ul style="list-style: none; padding-left: 0; margin-top: 10px;">
+                            ${specialistsDatabase[cityMentioned].map(specialist => `<li>• ${specialist}</li>`).join('')}
+                        </ul>
+                        Would you like more information about any of these specialists or centers?
+                    `;
+                } else {
+                    return `
+                        I can help you find specialists in these major Canadian cities:
+                        <ul style="list-style: none; padding-left: 0; margin-top: 10px;">
+                            <li>• Toronto, Ontario</li>
+                            <li>• Vancouver, British Columbia</li>
+                            <li>• Montreal, Quebec</li>
+                            <li>• Calgary, Alberta</li>
+                            <li>• Ottawa, Ontario</li>
+                        </ul>
+                        Please let me know which city you're interested in.
+                    `;
+                }
+            }
+            
+            // Treatment options and support services
+            else if (userMessage.includes('treatment') || userMessage.includes('therapy') || userMessage.includes('support service')) {
+                return `
+                    Here are common treatment options and support services:
+                    <ul style="list-style: none; padding-left: 0; margin-top: 10px;">
+                        <li>• Behavioral Therapies:
+                            <ul style="list-style: none; padding-left: 20px;">
+                                <li>- Applied Behavior Analysis (ABA)</li>
+                                <li>- Cognitive Behavioral Therapy (CBT)</li>
+                            </ul>
+                        </li>
+                        <li>• Developmental Therapies:
+                            <ul style="list-style: none; padding-left: 20px;">
+                                <li>- Speech and Language Therapy</li>
+                                <li>- Occupational Therapy</li>
+                                <li>- Physical Therapy</li>
+                            </ul>
+                        </li>
+                        <li>• Educational Support:
+                            <ul style="list-style: none; padding-left: 20px;">
+                                <li>- Individualized Education Programs</li>
+                                <li>- Special Education Services</li>
+                            </ul>
+                        </li>
+                        <li>• Support Services:
+                            <ul style="list-style: none; padding-left: 20px;">
+                                <li>- Respite Care</li>
+                                <li>- Family Counseling</li>
+                                <li>- Social Skills Training</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    Would you like more details about any specific treatment or service?
+                `;
+            }
+            
+            // Educational resources
+            else if (userMessage.includes('education') || userMessage.includes('resource') || userMessage.includes('learn')) {
+                return `
+                    Here are valuable educational resources:
+                    <ul style="list-style: none; padding-left: 0; margin-top: 10px;">
+                        <li>• Online Learning Platforms:
+                            <ul style="list-style: none; padding-left: 20px;">
+                                <li>- Autism Speaks Canada E-Learning</li>
+                                <li>- Geneva Centre for Autism E-Learning</li>
+                                <li>- Canadian Autism Spectrum Resource Network</li>
+                            </ul>
+                        </li>
+                        <li>• Educational Materials:
+                            <ul style="list-style: none; padding-left: 20px;">
+                                <li>- Social Stories and Visual Supports</li>
+                                <li>- Sensory Integration Resources</li>
+                                <li>- Communication Tools and Apps</li>
+                            </ul>
+                        </li>
+                        <li>• Parent Education Programs:
+                            <ul style="list-style: none; padding-left: 20px;">
+                                <li>- Parent Coaching Programs</li>
+                                <li>- Workshops and Webinars</li>
+                                <li>- Support Group Resources</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    Would you like specific information about any of these resources?
+                `;
+            }
+            
+            // Support groups and community connections
+            else if (userMessage.includes('group') || userMessage.includes('community') || userMessage.includes('connect')) {
+                return `
+                    Here are support groups and community connections:
+                    <ul style="list-style: none; padding-left: 0; margin-top: 10px;">
+                        <li>• Online Communities:
+                            <ul style="list-style: none; padding-left: 20px;">
+                                <li>- Autism Canada Forum</li>
+                                <li>- Provincial Autism Support Networks</li>
+                                <li>- Social Media Support Groups</li>
+                            </ul>
+                        </li>
+                        <li>• Local Support Groups:
+                            <ul style="list-style: none; padding-left: 20px;">
+                                <li>- Parent Support Groups</li>
+                                <li>- Sibling Support Programs</li>
+                                <li>- Teen and Adult Social Groups</li>
+                            </ul>
+                        </li>
+                        <li>• Community Activities:
+                            <ul style="list-style: none; padding-left: 20px;">
+                                <li>- Autism-Friendly Events</li>
+                                <li>- Recreational Programs</li>
+                                <li>- Social Skills Groups</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    Would you like to know more about any specific group or program?
+                `;
+            }
+            
+            // Default response
+            else {
+                return `
+                    I'm here to help! You can ask about:
+                    <ul style="list-style: none; padding-left: 0; margin-top: 10px;">
+                        <li>• Information about autism</li>
+                        <li>• Finding specialists in Canadian cities</li>
+                        <li>• Treatment options and support services</li>
+                        <li>• Educational resources</li>
+                        <li>• Support groups and community connections</li>
+                    </ul>
+                    Please let me know what you'd like to learn more about.
+                `;
+            }
+        }
+
+        // Handle send button click
+        sendBtn.addEventListener('click', function() {
+            const message = userInput.value.trim();
+            if (message) {
+                addMessage(message, true);
+                userInput.value = '';
+                
+                // Slight delay to simulate processing
+                setTimeout(() => {
+                    const response = getBotResponse(message);
+                    addMessage(response, false);
+                }, 500);
+            }
+        });
+
+        // Handle enter key
+        userInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendBtn.click();
+            }
+        });
+
+        // Display welcome message on page load
+        displayWelcomeMessage();
+    </script>
 </body>
 </html>
